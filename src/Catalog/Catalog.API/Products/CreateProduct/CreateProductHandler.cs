@@ -1,22 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using BuildingBlocks.CQRS;
-using MediatR;
-using Microsoft.Extensions.Logging;
 
 namespace Catalog.API.Products.CreateProduct
 {
     public record CreateProductCommand(Guid Id, string Name, string Description, List<string> Categories, string ImageFile, decimal Price) : ICommand<CreateProductResult>;
     public record CreateProductResult(Guid Id);
 
-    public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand, CreateProductResult>
+    internal class CreateProductCommandHandler : ICommandHandler<CreateProductCommand, CreateProductResult>
     {
+        private readonly IDocumentSession _documentSession;
         private readonly ILogger<CreateProductCommandHandler> _logger;
 
-        public CreateProductCommandHandler(ILogger<CreateProductCommandHandler> logger)
+        public CreateProductCommandHandler(IDocumentSession documentSession, ILogger<CreateProductCommandHandler> logger)
         {
+            _documentSession = documentSession;
             _logger = logger;
         }
 
@@ -37,7 +32,10 @@ namespace Catalog.API.Products.CreateProduct
                 };
 
                 //save the entity to the database
-
+                _documentSession.Store(product);
+                await _documentSession.SaveChangesAsync(cancellationToken);
+                
+                _logger.LogInformation("Product created successfully with ID: {ProductId}", product.Id);
                 return new CreateProductResult(product.Id);
             }
             catch (Exception ex)
