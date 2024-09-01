@@ -15,8 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.1" />
     <PackageReference Include="carter" Version="8.2.1" />
     <PackageReference Include="marten" Version="7.26.3" />
   </ItemGroup>
-
+ 
 </Project>

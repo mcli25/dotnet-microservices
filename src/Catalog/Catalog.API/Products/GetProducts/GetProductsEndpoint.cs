@@ -4,7 +4,7 @@ using Catalog.API.Models;
 
 namespace Catalog.API.Products.GetProducts
 {
-    public record GetProductsRequest(int PageNumber, int PageSize) : IRequest<GetProductsResponse>;
+    public record GetProductsRequest(int? PageNumber = 1, int? PageSize = 10) : IRequest<GetProductsResponse>;
     public record GetProductsResponse(IEnumerable<Product> Products, int TotalCount);
 
     public class GetProductsEndpoint : ICarterModule

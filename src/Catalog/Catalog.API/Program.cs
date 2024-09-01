@@ -1,15 +1,24 @@
 
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddCarter();
-builder.Services.AddMediatR(config => {
-    config.RegisterServicesFromAssembly(typeof(Program).Assembly);
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 });
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+builder.Services.AddCarter();
 
 builder.Services.AddMarten(options =>
 {
-    // Replace with your actual connection string
     options.Connection(builder.Configuration.GetConnectionString("DefaultConnection")!);
     
     // Configure the database schema name if needed
@@ -22,13 +31,19 @@ builder.Services.AddMarten(options =>
     // options.RegisterDocumentType<YourDocumentType>();
 })
 .UseLightweightSessions();
-
+if(builder.Environment.IsDevelopment()) 
+{
+    builder.Services.InitializeMartenWith<CatalogInitialData>();
+}
 // Add IDocumentSession as scoped
 builder.Services.AddScoped<IDocumentSession>(sp => sp.GetRequiredService<IDocumentStore>().LightweightSession());
+builder.Services.AddHealthChecks()
+.AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline
-app.MapCarter();
 
+app.MapCarter();
+app.UseStatusCodePages();
+app.UseHealthChecks("/health", new HealthCheckOptions{ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse});
 app.Run();

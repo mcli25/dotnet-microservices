@@ -15,5 +15,18 @@ services:
     volumes:
       - postgres_catalog:/var/lib/postgresql/data
 
+  catalogapi:
+    image: catalogapi
+    build:
+      context: .
+      dockerfile: src/Catalog/Catalog.API/Dockerfile
+    ports:
+      - 6000:8080
+      - 6060:8081
+    depends_on:
+      - catalogdb
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=catalogdb;Port=5432;Database=CatalogDb;Username=admin;Password=admin1234
+
 volumes:
   postgres_catalog:

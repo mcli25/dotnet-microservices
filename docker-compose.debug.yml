@@ -1,6 +1,6 @@
 # Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
 
-version: '3.4'
+version: "3.4"
 
 services:
   catalogapi:
@@ -11,8 +11,8 @@ services:
       args:
         - configuration=Debug
     ports:
-      - 8080:8080
-      - 8081:8081
+      - 6000:8080
+      - 6060:8081
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     volumes:
