@@ -1,10 +1,7 @@
-
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -13,6 +10,8 @@ builder.Services.AddMediatR(cfg =>
 
 });
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
 
 builder.Services.AddCarter();
 
@@ -24,16 +23,15 @@ builder.Services.AddMarten(options =>
     options.DatabaseSchemaName = "public";
     // Auto create and update the database on startup
     options.AutoCreateSchemaObjects = Weasel.Core.AutoCreate.All;
+    options.Schema.For<ShoppingCart>().Identity(x => x.Username);
 
-    // Add any additional Marten configurations here
-    // For example, to add specific document mappings:
-    // options.RegisterDocumentType<YourDocumentType>();
 })
 .UseLightweightSessions();
-if(builder.Environment.IsDevelopment()) 
-{
-    builder.Services.InitializeMartenWith<CatalogInitialData>();
-}
+
+// if(builder.Environment.IsDevelopment()) 
+// {
+//     builder.Services.InitializeMartenWith<CatalogInitialData>();
+// }
 // Add IDocumentSession as scoped
 builder.Services.AddScoped<IDocumentSession>(sp => sp.GetRequiredService<IDocumentStore>().LightweightSession());
 builder.Services.AddHealthChecks()
