@@ -34,13 +34,11 @@ namespace Basket.API.Basket.DeleteBasket
         {
             try
             {
-                _logger.LogInformation("Deleting basket for user: {Username}", request.Username);
-
                 var isDeleted = await _basketRepository.DeleteBasket(request.Username, cancellationToken);
 
                 if (isDeleted)
                 {
-                    _logger.LogInformation("Basket deleted successfully for user: {Username}", request.Username);
+                    _
                     return new DeleteBasketResult(true, "Basket deleted successfully");
                 }
                 _logger.LogWarning("Basket not found for user: {Username}", request.Username);

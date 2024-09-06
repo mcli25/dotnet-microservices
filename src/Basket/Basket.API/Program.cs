@@ -12,6 +12,14 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.Decorate<IBasketRepository, CachedBasketRepository>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    // options.InstanceName = "BasketApp"; 
+});
+
+
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 builder.Services.AddCarter();
 
@@ -35,12 +43,15 @@ builder.Services.AddMarten(options =>
 // Add IDocumentSession as scoped
 builder.Services.AddScoped<IDocumentSession>(sp => sp.GetRequiredService<IDocumentStore>().LightweightSession());
 builder.Services.AddHealthChecks()
-.AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!)
+    .AddRedis(builder.Configuration.GetConnectionString("RedisConnection")!);
 
 var app = builder.Build();
 // Configure the HTTP request pipeline
 
 app.MapCarter();
 app.UseStatusCodePages();
+app.UseExceptionHandler(options => {});
+
 app.UseHealthChecks("/health", new HealthCheckOptions{ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse});
 app.Run();

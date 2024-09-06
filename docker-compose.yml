@@ -40,18 +40,26 @@ services:
     volumes:
       - postgres_basket:/var/lib/postgresql/data
 
-  # basketapi:
-  #   image: basketapi
-  #   build:
-  #     context: .
-  #     dockerfile: src/Basket/Basket.API/Dockerfile
-  #   ports:
-  #     - 6000:8080
-  #     - 6060:8081
-  #   depends_on:
-  #     - basketdb
-  #   environment:
-  #     - ConnectionStrings__DefaultConnection=Host=basketdb;Port=5432;Database=BasketDb;Username=admin;Password=admin1234
+  distributedcache:
+    image: redis
+    container_name: distributedcache
+    ports:
+      - "6379:6379"
+
+  basketapi:
+    image: basketapi
+    build:
+      context: .
+      dockerfile: src/Basket/Basket.API/Dockerfile
+    ports:
+      - 6001:8080
+      - 6061:8081
+    depends_on:
+      - basketdb
+      - distributedcache
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=basketdb;Port=5432;Database=BasketDb;Username=admin;Password=admin1234
+      - ConnectionStrings__RedisConnection=distributedcache:6379
 
 volumes:
   postgres_catalog:

@@ -7,6 +7,9 @@ global using MediatR;
 global using Microsoft.Extensions.Logging;
 global using FluentValidation;
 global using Marten;
+global using Microsoft.Extensions.Caching.Distributed;
+global using BuildingBlocks.Exceptions.Handler;
+global using System.Text.Json;
 
 
 

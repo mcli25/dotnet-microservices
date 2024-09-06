@@ -1,4 +1,5 @@
 
+using BuildingBlocks.Exceptions.Handler;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -38,11 +39,13 @@ if(builder.Environment.IsDevelopment())
 builder.Services.AddScoped<IDocumentSession>(sp => sp.GetRequiredService<IDocumentStore>().LightweightSession());
 builder.Services.AddHealthChecks()
 .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
 // Configure the HTTP request pipeline
 
 app.MapCarter();
 app.UseStatusCodePages();
+app.UseExceptionHandler(options => {});
 app.UseHealthChecks("/health", new HealthCheckOptions{ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse});
 app.Run();
