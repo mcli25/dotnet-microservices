@@ -38,7 +38,6 @@ namespace Basket.API.Basket.DeleteBasket
 
                 if (isDeleted)
                 {
-                    _
                     return new DeleteBasketResult(true, "Basket deleted successfully");
                 }
                 _logger.LogWarning("Basket not found for user: {Username}", request.Username);
