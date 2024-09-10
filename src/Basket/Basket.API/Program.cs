@@ -36,15 +36,18 @@ builder.Services.AddMarten(options =>
 })
 .UseLightweightSessions();
 
-// if(builder.Environment.IsDevelopment()) 
-// {
-//     builder.Services.InitializeMartenWith<CatalogInitialData>();
-// }
+//Grpc
+builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
+});
+
 // Add IDocumentSession as scoped
 builder.Services.AddScoped<IDocumentSession>(sp => sp.GetRequiredService<IDocumentStore>().LightweightSession());
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!)
     .AddRedis(builder.Configuration.GetConnectionString("RedisConnection")!);
+
 
 var app = builder.Build();
 // Configure the HTTP request pipeline

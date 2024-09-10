@@ -10,7 +10,7 @@ global using Marten;
 global using Microsoft.Extensions.Caching.Distributed;
 global using BuildingBlocks.Exceptions.Handler;
 global using System.Text.Json;
-
+global using DiscountGrpc;
 
 
 

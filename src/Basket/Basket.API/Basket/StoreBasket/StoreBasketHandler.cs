@@ -41,7 +41,6 @@ namespace Basket.API.Basket.StoreBasket
 
                 var storedCart = await _basketRepository.StoreBasket(request.Cart, cancellationToken);
 
-                _logger.LogInformation("Basket stored successfully for user: {Username}", storedCart.Username);
                 return new StoreBasketResult(storedCart.Username);
             }
             catch (Exception ex)

@@ -5,6 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080, o => o.Protocols = HttpProtocols.Http2);
+    options.ListenAnyIP(8081, o => 
+    {
+        o.Protocols = HttpProtocols.Http2;
+        o.UseHttps("/https/aspnetapp.pfx", "admin1234");
+    });
+});
 // Add services to the container.
 builder.Services.AddGrpc();
 builder.Services.AddGrpcReflection();
@@ -33,7 +43,7 @@ using (var scope = app.Services.CreateScope())
         if (!Directory.Exists(dbPath))
         {
             Console.WriteLine($"Creating directory: {dbPath}");
-            Directory.CreateDirectory(dbPath);
+            Directory.CreateDirectory(dbPath!);
         }
         
         context.Database.EnsureCreated();
@@ -46,10 +56,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapGrpcReflectionService();
-}
+app.MapGrpcReflectionService();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<DiscountService>();

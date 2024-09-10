@@ -57,9 +57,11 @@ services:
     depends_on:
       - basketdb
       - distributedcache
+      - discountgrpc
     environment:
       - ConnectionStrings__DefaultConnection=Host=basketdb;Port=5432;Database=BasketDb;Username=admin;Password=admin1234
       - ConnectionStrings__RedisConnection=distributedcache:6379
+      - GrpcSettings__DiscountUri=https://discount.grpc:8081
 
   discountgrpc:
     image: discountgrpc
@@ -71,10 +73,13 @@ services:
       - 6062:8081
     volumes:
       - discountdata:/app/data
+      - ${HOME}/.aspnet/https:/https:ro
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Database=Data Source=/app/data/discountdb.sqlite
-
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=admin1234
 volumes:
   postgres_catalog:
   postgres_basket:
