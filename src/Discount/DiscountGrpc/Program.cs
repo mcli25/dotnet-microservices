@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using DiscountGrpc.Data;
 using DiscountGrpc.Services;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -12,7 +13,11 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(8081, o => 
     {
         o.Protocols = HttpProtocols.Http2;
-        o.UseHttps("/https/aspnetapp.pfx", "admin1234");
+        o.UseHttps(httpsOptions =>
+        {
+            var cert = new X509Certificate2("/https/aspnetapp.pfx", "admin1234");
+            httpsOptions.ServerCertificate = cert;
+        });
     });
 });
 // Add services to the container.

@@ -22,4 +22,5 @@ RUN dotnet publish "Basket.API.csproj" -c $configuration -o /app/publish /p:UseA
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ["src/Basket/Basket.API/appsettings.json", "src/Basket/Basket.API/appsettings.Development.json", "./"]
 ENTRYPOINT ["dotnet", "Basket.API.dll"]

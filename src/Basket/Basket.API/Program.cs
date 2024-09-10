@@ -3,6 +3,18 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+    });
+    options.ListenAnyIP(8081, listenOptions =>
+    {
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+        listenOptions.UseHttps();
+    });
+});
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
@@ -37,9 +49,20 @@ builder.Services.AddMarten(options =>
 .UseLightweightSessions();
 
 //Grpc
-builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(options =>
+builder.Services.AddGrpcClient<DiscountGrpc.DiscountProtoService.DiscountProtoServiceClient>(o =>
 {
-    options.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]!);
+    o.Address = new Uri(builder.Configuration["GrpcSettings:DiscountUrl"]);
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
+{
+    var handler = new HttpClientHandler();
+    if (builder.Environment.IsDevelopment())
+    {
+        handler.ServerCertificateCustomValidationCallback = 
+            (httpRequestMessage, cert, cetChain, policyErrors) => true;
+        Console.WriteLine("SSL certificate validation completely disabled for development.");
+    }
+    return handler;
 });
 
 // Add IDocumentSession as scoped

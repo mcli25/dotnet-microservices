@@ -61,7 +61,15 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=basketdb;Port=5432;Database=BasketDb;Username=admin;Password=admin1234
       - ConnectionStrings__RedisConnection=distributedcache:6379
-      - GrpcSettings__DiscountUri=https://discount.grpc:8081
+      - GrpcSettings__DiscountUrl=https://discountgrpc:8081
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:8081;http://+:8080
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=admin1234
+    links:
+      - discountgrpc
+    volumes:
+      - ${HOME}/.aspnet/https:/https:ro
 
   discountgrpc:
     image: discountgrpc
@@ -80,6 +88,7 @@ services:
       - ASPNETCORE_URLS=https://+:8081;http://+:8080
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=admin1234
+
 volumes:
   postgres_catalog:
   postgres_basket:
